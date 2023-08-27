@@ -1,6 +1,6 @@
 module github.com/yiwen-ai/wallet-api
 
-go 1.20
+go 1.21
 
 require (
 	github.com/BurntSushi/toml v1.3.2
@@ -9,7 +9,7 @@ require (
 	github.com/fxamacker/cbor/v2 v2.5.0
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/go-playground/validator/v10 v10.15.1
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/klauspost/compress v1.16.7
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/rs/xid v1.5.0

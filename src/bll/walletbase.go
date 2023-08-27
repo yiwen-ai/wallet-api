@@ -2,6 +2,7 @@ package bll
 
 import (
 	"context"
+	"math"
 
 	"github.com/teambition/gear"
 	"github.com/yiwen-ai/wallet-api/src/service"
@@ -31,12 +32,19 @@ func (b *Walletbase) ListCurrencies(ctx context.Context) ([]Currency, error) {
 }
 
 type WalletOutput struct {
-	Sequence int64    `json:"sequence" cbor:"sequence"`
+	Sequence uint64   `json:"sequence" cbor:"sequence"`
 	Award    int64    `json:"award" cbor:"award"`
 	Topup    int64    `json:"topup" cbor:"topup"`
 	Income   int64    `json:"income" cbor:"income"`
-	Credits  int64    `json:"credits" cbor:"credits"`
+	Credits  uint64   `json:"credits" cbor:"credits"`
+	Level    uint8    `json:"level" cbor:"level"`
 	Txn      *util.ID `json:"txn,omitempty" cbor:"txn,omitempty"`
+}
+
+func (w *WalletOutput) SetLevel() {
+	if w.Credits > 0 {
+		w.Level = uint8(math.Floor(math.Log10(float64(w.Credits))))
+	}
 }
 
 func (b *Walletbase) Get(ctx context.Context, uid util.ID) (*WalletOutput, error) {
@@ -44,7 +52,7 @@ func (b *Walletbase) Get(ctx context.Context, uid util.ID) (*WalletOutput, error
 	if err := b.svc.Get(ctx, "/v1/wallet?uid="+uid.String(), &output); err != nil {
 		return nil, err
 	}
-
+	output.Result.SetLevel()
 	return &output.Result, nil
 }
 
@@ -71,25 +79,9 @@ func (b *Walletbase) Sponsor(ctx context.Context, input *ExpendInput) (*WalletOu
 		return nil, err
 	}
 
+	output.Result.SetLevel()
 	return &output.Result, nil
 }
-
-// pub struct TransactionOutput {
-// 	pub id: PackObject<xid::Id>,
-// 	pub sequence: i64,
-// 	pub payee: PackObject<xid::Id>,
-// 	#[serde(skip_serializing_if = "Option::is_none")]
-// 	pub sub_payee: Option<PackObject<xid::Id>>,
-// 	pub status: i8,
-// 	pub kind: String,
-// 	pub amount: i64,
-// 	pub sys_fee: i64,
-// 	pub sub_shares: i64,
-// 	#[serde(skip_serializing_if = "Option::is_none")]
-// 	pub description: Option<String>,
-// 	#[serde(skip_serializing_if = "Option::is_none")]
-// 	pub payload: Option<PackObject<Vec<u8>>>,
-// }
 
 type TransactionOutput struct {
 	ID           util.ID     `json:"id" cbor:"id"`

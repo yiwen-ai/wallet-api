@@ -48,7 +48,7 @@ func (a *Wallet) Sponsor(ctx *gear.Context) error {
 
 	if _, err = a.blls.Logbase.Log(ctx, bll.LogActionUserSponsor, 1, sess.UserID, &bll.Payload{
 		Payer:    *input.UID,
-		Payee:    input.Payee,
+		Payee:    &input.Payee,
 		SubPayee: nil,
 		Amount:   input.Amount,
 	}); err != nil {

@@ -86,7 +86,7 @@ func (i *UIDPagination) Validate() error {
 
 type Payload struct {
 	Payer    util.ID  `json:"payer" cbor:"payer"`
-	Payee    util.ID  `json:"payee" cbor:"payee"`
+	Payee    *util.ID `json:"payee,omitempty" cbor:"payee,omitempty"`
 	SubPayee *util.ID `json:"sub_payee,omitempty" cbor:"sub_payee,omitempty"`
 	Amount   int64    `json:"amount" cbor:"amount"`
 }
