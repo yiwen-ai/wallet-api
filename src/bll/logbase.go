@@ -103,11 +103,12 @@ func (b *Logbase) Log(ctx *gear.Context, action string, status int8, gid util.ID
 	}
 
 	input := CreateLogInput{
-		UID:    sess.UserID,
-		GID:    gid,
-		Action: action,
-		Status: status,
-		IP:     ctx.IP().String(),
+		UID:     sess.UserID,
+		GID:     gid,
+		Action:  action,
+		Status:  status,
+		Payload: util.Bytes{0xa0}, // {}
+		IP:      ctx.IP().String(),
 	}
 
 	if payload != nil {
