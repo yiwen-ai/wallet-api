@@ -32,13 +32,13 @@ func (b *Walletbase) ListCurrencies(ctx context.Context) ([]Currency, error) {
 }
 
 type WalletOutput struct {
-	Sequence uint64   `json:"sequence" cbor:"sequence"`
-	Award    int64    `json:"award" cbor:"award"`
-	Topup    int64    `json:"topup" cbor:"topup"`
-	Income   int64    `json:"income" cbor:"income"`
-	Credits  uint64   `json:"credits" cbor:"credits"`
-	Level    uint8    `json:"level" cbor:"level"`
-	Txn      *util.ID `json:"txn,omitempty" cbor:"txn,omitempty"`
+	Sequence uint64  `json:"sequence" cbor:"sequence"`
+	Award    int64   `json:"award" cbor:"award"`
+	Topup    int64   `json:"topup" cbor:"topup"`
+	Income   int64   `json:"income" cbor:"income"`
+	Credits  uint64  `json:"credits" cbor:"credits"`
+	Level    uint8   `json:"level" cbor:"level"`
+	Txn      util.ID `json:"txn" cbor:"txn"`
 }
 
 func (w *WalletOutput) SetLevel() {
