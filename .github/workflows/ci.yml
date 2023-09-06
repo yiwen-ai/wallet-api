@@ -17,7 +17,7 @@ jobs:
         image: eqalpha/keydb:latest
         ports:
           - 6379:6379
-        options: --health-cmd "redis-cli ping " --health-interval 5s --health-retries 10
+        options: --server-threads 1 --health-cmd "redis-cli ping " --health-interval 5s --health-retries 10
         volumes:
           - ${{ github.workspace }}:/workspace
     steps:

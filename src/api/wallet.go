@@ -4,6 +4,7 @@ import (
 	"github.com/teambition/gear"
 
 	"github.com/yiwen-ai/wallet-api/src/bll"
+	"github.com/yiwen-ai/wallet-api/src/logging"
 	"github.com/yiwen-ai/wallet-api/src/middleware"
 )
 
@@ -54,12 +55,14 @@ func (a *Wallet) Sponsor(ctx *gear.Context) error {
 	}
 
 	if _, err = a.blls.Logbase.Log(ctx, bll.LogActionUserSponsor, 1, sess.UserID, &bll.Payload{
+		Kind:     "transaction",
+		ID:       output.Txn,
 		Payer:    *input.UID,
 		Payee:    &input.Payee,
 		SubPayee: nil,
 		Amount:   input.Amount,
 	}); err != nil {
-		return gear.ErrInternalServerError.From(err)
+		logging.SetTo(ctx, "writeLogError", err.Error())
 	}
 
 	return ctx.OkSend(bll.SuccessResponse[*bll.WalletOutput]{Result: output})

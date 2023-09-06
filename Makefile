@@ -10,7 +10,7 @@ BUILD_TIME := $(shell date -u +"%FT%TZ")
 BUILD_COMMIT := $(shell git rev-parse HEAD)
 
 run-dev:
-	@CONFIG_FILE_PATH=${PWD}/config.toml APP_ENV=dev go run main.go
+	@APP_ENV=dev go run main.go
 
 test:
 	@CONFIG_FILE_PATH=${PWD}/config/default.toml APP_ENV=test go test ./...

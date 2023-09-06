@@ -2,6 +2,7 @@ package bll
 
 import (
 	"context"
+	"strings"
 
 	"github.com/teambition/gear"
 
@@ -87,6 +88,8 @@ func (i *UIDPagination) Validate() error {
 }
 
 type Payload struct {
+	Kind     string   `json:"kind" cbor:"kind"`
+	ID       util.ID  `json:"id" cbor:"id"`
 	Payer    util.ID  `json:"payer" cbor:"payer"`
 	Payee    *util.ID `json:"payee,omitempty" cbor:"payee,omitempty"`
 	SubPayee *util.ID `json:"sub_payee,omitempty" cbor:"sub_payee,omitempty"`
@@ -94,15 +97,11 @@ type Payload struct {
 }
 
 type QueryIdCn struct {
-	ID     *util.ID `json:"id,omitempty" cbor:"id,omitempty" query:"id"`
-	CN     *string  `json:"cn,omitempty" cbor:"cn,omitempty" query:"cn"`
-	Fields *string  `json:"fields,omitempty" cbor:"fields,omitempty" query:"fields"`
+	ID     util.ID `json:"id,omitempty" cbor:"id,omitempty" query:"id"`
+	Fields *string `json:"fields,omitempty" cbor:"fields,omitempty" query:"fields"`
 }
 
 func (i *QueryIdCn) Validate() error {
-	if i.ID == nil && i.CN == nil {
-		return gear.ErrBadRequest.WithMsg("id or cn is required")
-	}
 	return nil
 }
 
@@ -115,3 +114,14 @@ type Currency struct {
 }
 
 type Currencies []Currency
+
+func (cs Currencies) Validate(cur string) error {
+	cur = strings.ToUpper(cur)
+	for _, c := range cs {
+		if c.Alpha == cur {
+			return nil
+		}
+	}
+
+	return gear.ErrBadRequest.From(gear.ErrBadRequest.WithMsgf("currency %s not supported", cur))
+}

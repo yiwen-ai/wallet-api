@@ -18,3 +18,8 @@ node = "127.0.0.1:6379"
 userbase = "http://127.0.0.1:8080"
 logbase = "http://127.0.0.1:8080"
 walletbase = "http://127.0.0.1:8080"
+
+[stripe]
+pub_key = ""
+price_id = ""
+success_url = "http://127.0.0.1:8080/wallet"

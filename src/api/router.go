@@ -4,6 +4,7 @@ import (
 	"github.com/teambition/gear"
 
 	"github.com/yiwen-ai/wallet-api/src/bll"
+	"github.com/yiwen-ai/wallet-api/src/conf"
 	"github.com/yiwen-ai/wallet-api/src/middleware"
 	"github.com/yiwen-ai/wallet-api/src/util"
 )
@@ -15,6 +16,7 @@ func init() {
 
 // APIs ..
 type APIs struct {
+	Checkout    *Checkout
 	Healthz     *Healthz
 	Transaction *Transaction
 	Wallet      *Wallet
@@ -22,14 +24,11 @@ type APIs struct {
 
 func newAPIs(blls *bll.Blls) *APIs {
 	return &APIs{
+		Checkout:    &Checkout{blls: blls, cfg: conf.Config.Stripe},
 		Healthz:     &Healthz{blls},
 		Transaction: &Transaction{blls},
 		Wallet:      &Wallet{blls},
 	}
-}
-
-func todo(ctx *gear.Context) error {
-	return gear.ErrNotImplemented.WithMsgf("TODO: %s %s", ctx.Method, ctx.Path)
 }
 
 func newRouters(apis *APIs) []*gear.Router {
@@ -47,6 +46,13 @@ func newRouters(apis *APIs) []*gear.Router {
 	router.Post("/v1/transaction/list_outgo", middleware.AuthToken.Auth, apis.Transaction.ListOutgo)
 	router.Post("/v1/transaction/list_income", middleware.AuthToken.Auth, apis.Transaction.ListIncome)
 	router.Post("/v1/transaction/list_shares", middleware.AuthToken.Auth, apis.Transaction.ListShares)
+
+	router.Get("/v1/checkout/config", middleware.AuthToken.Auth, apis.Checkout.GetConfig)
+	router.Get("/v1/checkout", middleware.AuthToken.Auth, apis.Checkout.Get)
+	router.Post("/v1/checkout", middleware.AuthToken.Auth, apis.Checkout.Create)
+	router.Post("/v1/checkout/list", middleware.AuthToken.Auth, apis.Checkout.ListCharges)
+
+	router.Post("/v1/webhook/stripe", apis.Checkout.StripeWebhook)
 
 	return []*gear.Router{router}
 }

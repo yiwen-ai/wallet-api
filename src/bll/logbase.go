@@ -26,6 +26,7 @@ const (
 	LogActionUserFollow               = "user.follow"
 	LogActionUserSubscribe            = "user.subscribe"
 	LogActionUserSponsor              = "user.sponsor"
+	LogActionUserTopup                = "user.topup"
 	LogActionGroupCreate              = "group.create"
 	LogActionGroupUpdate              = "group.update"
 	LogActionGroupUpdateCN            = "group.update.cn"

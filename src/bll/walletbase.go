@@ -3,6 +3,7 @@ package bll
 import (
 	"context"
 	"math"
+	"net/url"
 
 	"github.com/teambition/gear"
 	"github.com/yiwen-ai/wallet-api/src/service"
@@ -168,4 +169,147 @@ func (b *Walletbase) ListShares(ctx context.Context, input *UIDPagination) (*Suc
 	}
 
 	return &output, nil
+}
+
+type CustomerInput struct {
+	UID      util.ID    `json:"uid" cbor:"uid"`
+	Provider string     `json:"provider" cbor:"provider"`
+	Customer string     `json:"customer" cbor:"customer"`
+	Payload  util.Bytes `json:"payload" cbor:"payload"`
+}
+
+type CustomerOutput struct {
+	UID       util.ID     `json:"uid" cbor:"uid"`
+	Provider  string      `json:"provider" cbor:"provider"`
+	Customer  string      `json:"customer" cbor:"customer"`
+	CreatedAt *int64      `json:"created_at,omitempty" cbor:"created_at,omitempty"`
+	UpdatedAt *int64      `json:"updated_at,omitempty" cbor:"updated_at,omitempty"`
+	Payload   *util.Bytes `json:"payload,omitempty" cbor:"payload,omitempty"`
+	Customers []string    `json:"customers,omitempty" cbor:"customers,omitempty"`
+}
+
+func (b *Walletbase) GetCustomer(ctx context.Context, uid util.ID, provider string, fields *string) (*CustomerOutput, error) {
+	output := SuccessResponse[CustomerOutput]{}
+
+	query := url.Values{}
+	query.Add("uid", uid.String())
+	query.Add("provider", provider)
+	if fields != nil && len(*fields) > 0 {
+		query.Add("fields", *fields)
+	}
+	if err := b.svc.Get(ctx, "/v1/customer?"+query.Encode(), &output); err != nil {
+		return nil, err
+	}
+
+	return &output.Result, nil
+}
+
+func (b *Walletbase) UpsertCustomer(ctx context.Context, input *CustomerInput) (*CustomerOutput, error) {
+	output := SuccessResponse[CustomerOutput]{}
+	if err := b.svc.Post(ctx, "/v1/customer", input, &output); err != nil {
+		return nil, err
+	}
+
+	return &output.Result, nil
+}
+
+type ChargeInput struct {
+	UID           util.ID     `json:"uid" cbor:"uid"`
+	Provider      string      `json:"provider" cbor:"provider"`
+	Quantity      uint        `json:"quantity" cbor:"quantity"`
+	Currency      *string     `json:"currency,omitempty" cbor:"currency,omitempty"`
+	Amount        *uint       `json:"amount,omitempty" cbor:"amount,omitempty"`
+	ChargeID      *string     `json:"charge_id,omitempty" cbor:"charge_id,omitempty"`
+	ChargePayload *util.Bytes `json:"charge_payload,omitempty" cbor:"charge_payload,omitempty"`
+}
+
+type UpdateChargeInput struct {
+	UID           util.ID     `json:"uid" cbor:"uid"`
+	ID            util.ID     `json:"id" cbor:"id"`
+	CurrentStatus int8        `json:"current_status" cbor:"current_status"`
+	Status        int8        `json:"status" cbor:"status"`
+	Currency      *string     `json:"currency,omitempty" cbor:"currency,omitempty"`
+	Amount        *uint       `json:"amount,omitempty" cbor:"amount,omitempty"`
+	ChargeID      *string     `json:"charge_id,omitempty" cbor:"charge_id,omitempty"`
+	ChargePayload *util.Bytes `json:"charge_payload,omitempty" cbor:"charge_payload,omitempty"`
+	FailureCode   *string     `json:"failure_code,omitempty" cbor:"failure_code,omitempty"`
+	FailureMsg    *string     `json:"failure_msg,omitempty" cbor:"failure_msg,omitempty"`
+}
+
+type CompleteChargeInput struct {
+	UID           util.ID    `json:"uid" cbor:"uid"`
+	ID            util.ID    `json:"id" cbor:"id"`
+	ChargeID      string     `json:"charge_id" cbor:"charge_id"`
+	ChargePayload util.Bytes `json:"charge_payload" cbor:"charge_payload"`
+}
+
+type ChargeOutput struct {
+	// UID       util.ID    `json:"uid" cbor:"uid"` // should not return to client
+	ID             util.ID     `json:"id" cbor:"id"`
+	Provider       string      `json:"provider" cbor:"provider"`
+	Status         int8        `json:"status" cbor:"status"`
+	Quantity       uint        `json:"quantity" cbor:"quantity"`
+	UpdatedAt      *int64      `json:"updated_at,omitempty" cbor:"updated_at,omitempty"`
+	ExpireAt       *int64      `json:"expire_at,omitempty" cbor:"expire_at,omitempty"`
+	Currency       *string     `json:"currency,omitempty" cbor:"currency,omitempty"`
+	Amount         *uint       `json:"amount,omitempty" cbor:"amount,omitempty"`
+	AmountRefunded *string     `json:"amount_refunded,omitempty" cbor:"amount_refunded,omitempty"`
+	ChargeID       *string     `json:"charge_id,omitempty" cbor:"charge_id,omitempty"`
+	ChargePayload  *util.Bytes `json:"charge_payload,omitempty" cbor:"charge_payload,omitempty"`
+	Txn            *util.ID    `json:"txn,omitempty" cbor:"txn,omitempty"`
+	TxnRefunded    *util.ID    `json:"txn_refunded,omitempty" cbor:"txn_refunded,omitempty"`
+	FailureCode    *string     `json:"failure_code,omitempty" cbor:"failure_code,omitempty"`
+	FailureMsg     *string     `json:"failure_msg,omitempty" cbor:"failure_msg,omitempty"`
+}
+
+func (b *Walletbase) GetCharge(ctx context.Context, uid, id util.ID, fields *string) (*ChargeOutput, error) {
+	output := SuccessResponse[ChargeOutput]{}
+
+	query := url.Values{}
+	query.Add("uid", uid.String())
+	query.Add("id", id.String())
+	if fields != nil && len(*fields) > 0 {
+		query.Add("fields", *fields)
+	}
+	if err := b.svc.Get(ctx, "/v1/charge?"+query.Encode(), &output); err != nil {
+		return nil, err
+	}
+
+	return &output.Result, nil
+}
+
+func (b *Walletbase) CreateCharge(ctx context.Context, input *ChargeInput) (*ChargeOutput, error) {
+	output := SuccessResponse[ChargeOutput]{}
+	if err := b.svc.Post(ctx, "/v1/charge", input, &output); err != nil {
+		return nil, err
+	}
+
+	return &output.Result, nil
+}
+
+func (b *Walletbase) UpdateCharge(ctx context.Context, input *UpdateChargeInput) (*ChargeOutput, error) {
+	output := SuccessResponse[ChargeOutput]{}
+	if err := b.svc.Patch(ctx, "/v1/charge", input, &output); err != nil {
+		return nil, err
+	}
+
+	return &output.Result, nil
+}
+
+func (b *Walletbase) CompleteCharge(ctx context.Context, input *CompleteChargeInput) (*ChargeOutput, error) {
+	output := SuccessResponse[ChargeOutput]{}
+	if err := b.svc.Post(ctx, "/v1/charge/complete", input, &output); err != nil {
+		return nil, err
+	}
+
+	return &output.Result, nil
+}
+
+func (b *Walletbase) ListCharges(ctx context.Context, input *UIDPagination) ([]ChargeOutput, error) {
+	output := SuccessResponse[[]ChargeOutput]{}
+	if err := b.svc.Post(ctx, "/v1/charge/list", input, &output); err != nil {
+		return nil, err
+	}
+
+	return output.Result, nil
 }

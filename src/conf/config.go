@@ -3,6 +3,7 @@ package conf
 import (
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"sync"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/joho/godotenv"
 	"github.com/teambition/gear"
 )
 
@@ -24,6 +26,11 @@ var GitSHA1 = "unknown"
 var once sync.Once
 
 func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file", err.Error())
+	}
+
 	p := &Config
 	readConfig(p, "../../config/default.toml")
 	if err := p.Validate(); err != nil {
@@ -61,6 +68,14 @@ type Redis struct {
 	Node   string `json:"node" toml:"node"`
 }
 
+type Stripe struct {
+	PubKey     string `json:"pub_key" toml:"pub_key"`
+	PriceID    string `json:"price_id" toml:"price_id"`
+	SuccessUrl string `json:"success_url" toml:"success_url"`
+	SecretKey  string
+	WebhookKey string
+}
+
 // ConfigTpl ...
 type ConfigTpl struct {
 	Rand           *rand.Rand
@@ -71,11 +86,17 @@ type ConfigTpl struct {
 	Server         Server `json:"server" toml:"server"`
 	Redis          Redis  `json:"redis" toml:"redis"`
 	Base           Base   `json:"base" toml:"base"`
+	Stripe         Stripe `json:"stripe" toml:"stripe"`
 
 	globalJobs int64 // global async jobs counter for graceful shutdown
 }
 
 func (c *ConfigTpl) Validate() error {
+	c.Stripe.SecretKey = os.Getenv("STRIPE_SECRET_KEY")
+	c.Stripe.WebhookKey = os.Getenv("STRIPE_WEBHOOK_SECRET")
+	if c.Stripe.SecretKey == "" {
+		log.Println("STRIPE_SECRET_KEY is not set")
+	}
 	return nil
 }
 

@@ -50,7 +50,11 @@ func NewApp() *gear.App {
 	})
 
 	if err != nil {
-		logging.Panicf("DigInvoke error: %v", err)
+		if conf.Config.Env == "prod" {
+			logging.Panicf("DigInvoke error: %v", err)
+		} else {
+			logging.Warningf("DigInvoke error: %v", err)
+		}
 	}
 
 	return app
