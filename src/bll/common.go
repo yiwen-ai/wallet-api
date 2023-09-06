@@ -96,12 +96,12 @@ type Payload struct {
 	Amount   int64    `json:"amount" cbor:"amount"`
 }
 
-type QueryIdCn struct {
+type QueryId struct {
 	ID     util.ID `json:"id,omitempty" cbor:"id,omitempty" query:"id"`
 	Fields *string `json:"fields,omitempty" cbor:"fields,omitempty" query:"fields"`
 }
 
-func (i *QueryIdCn) Validate() error {
+func (i *QueryId) Validate() error {
 	return nil
 }
 

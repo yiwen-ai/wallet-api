@@ -253,7 +253,7 @@ type ChargeOutput struct {
 	ExpireAt       *int64      `json:"expire_at,omitempty" cbor:"expire_at,omitempty"`
 	Currency       *string     `json:"currency,omitempty" cbor:"currency,omitempty"`
 	Amount         *uint       `json:"amount,omitempty" cbor:"amount,omitempty"`
-	AmountRefunded *string     `json:"amount_refunded,omitempty" cbor:"amount_refunded,omitempty"`
+	AmountRefunded *uint       `json:"amount_refunded,omitempty" cbor:"amount_refunded,omitempty"`
 	ChargeID       *string     `json:"charge_id,omitempty" cbor:"charge_id,omitempty"`
 	ChargePayload  *util.Bytes `json:"charge_payload,omitempty" cbor:"charge_payload,omitempty"`
 	Txn            *util.ID    `json:"txn,omitempty" cbor:"txn,omitempty"`

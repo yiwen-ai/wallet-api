@@ -53,7 +53,7 @@ func (a *Checkout) GetConfig(ctx *gear.Context) error {
 }
 
 func (a *Checkout) Get(ctx *gear.Context) error {
-	input := &bll.QueryIdCn{}
+	input := &bll.QueryId{}
 	if err := ctx.ParseURL(input); err != nil {
 		return err
 	}
