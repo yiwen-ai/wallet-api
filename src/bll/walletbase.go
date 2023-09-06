@@ -10,19 +10,20 @@ import (
 )
 
 type Walletbase struct {
-	svc service.APIHost
+	svc        service.APIHost
+	Currencies Currencies
 }
 
-type Currency struct {
-	Name      string `json:"name" cbor:"name"`
-	Alpha     string `json:"alpha" cbor:"alpha"`
-	Decimals  uint8  `json:"decimals" cbor:"decimals"`
-	Code      uint16 `json:"code" cbor:"code"`
-	MinAmount uint   `json:"min_amount" cbor:"min_amount"`
-	MaxAmount uint   `json:"max_amount" cbor:"max_amount"`
+func (b *Walletbase) InitApp(ctx context.Context, _ *gear.App) error {
+	output, err := b.listCurrencies(ctx)
+	if err != nil {
+		return err
+	}
+	b.Currencies = output
+	return nil
 }
 
-func (b *Walletbase) ListCurrencies(ctx context.Context) ([]Currency, error) {
+func (b *Walletbase) listCurrencies(ctx context.Context) ([]Currency, error) {
 	output := SuccessResponse[[]Currency]{}
 	if err := b.svc.Get(ctx, "/currencies", &output); err != nil {
 		return nil, err

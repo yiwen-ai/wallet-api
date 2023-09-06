@@ -16,20 +16,22 @@ func init() {
 
 // Blls ...
 type Blls struct {
-	Logbase    *Logbase
-	Taskbase   *Taskbase
-	Userbase   *Userbase
-	Walletbase *Walletbase
+	ExternalAPI *ExternalAPI
+	Logbase     *Logbase
+	Taskbase    *Taskbase
+	Userbase    *Userbase
+	Walletbase  *Walletbase
 }
 
 // NewBlls ...
-func NewBlls() *Blls {
+func NewBlls(redis *service.Redis) *Blls {
 	cfg := conf.Config.Base
 	return &Blls{
-		Logbase:    &Logbase{svc: service.APIHost(cfg.Logbase)},
-		Taskbase:   &Taskbase{svc: service.APIHost(cfg.Taskbase)},
-		Userbase:   &Userbase{svc: service.APIHost(cfg.Userbase)},
-		Walletbase: &Walletbase{svc: service.APIHost(cfg.Walletbase)},
+		ExternalAPI: &ExternalAPI{redis: redis},
+		Logbase:     &Logbase{svc: service.APIHost(cfg.Logbase)},
+		Taskbase:    &Taskbase{svc: service.APIHost(cfg.Taskbase)},
+		Userbase:    &Userbase{svc: service.APIHost(cfg.Userbase)},
+		Walletbase:  &Walletbase{svc: service.APIHost(cfg.Walletbase)},
 	}
 }
 
@@ -103,3 +105,13 @@ func (i *QueryIdCn) Validate() error {
 	}
 	return nil
 }
+
+type Currency struct {
+	Name     string  `json:"name" cbor:"name"`
+	Alpha    string  `json:"alpha" cbor:"alpha"`
+	Decimals uint8   `json:"decimals" cbor:"decimals"`
+	Code     uint16  `json:"code" cbor:"code"`
+	Rate     float32 `json:"exchange_rate" cbor:"exchange_rate"` // HKD: 10000
+}
+
+type Currencies []Currency

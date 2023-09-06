@@ -12,12 +12,19 @@ type Wallet struct {
 }
 
 func (a *Wallet) ListCurrencies(ctx *gear.Context) error {
-	output, err := a.blls.Walletbase.ListCurrencies(ctx)
+	currencies := make(bll.Currencies, 0, len(a.blls.Walletbase.Currencies))
+	rates, err := a.blls.ExternalAPI.ExchangeRate(ctx)
 	if err != nil {
 		return gear.ErrInternalServerError.From(err)
 	}
 
-	return ctx.OkSend(bll.SuccessResponse[[]bll.Currency]{Result: output})
+	var ok bool
+	for _, currency := range a.blls.Walletbase.Currencies {
+		if currency.Rate, ok = rates.Rates[currency.Alpha]; ok {
+			currencies = append(currencies, currency)
+		}
+	}
+	return ctx.OkSend(bll.SuccessResponse[bll.Currencies]{Result: currencies})
 }
 
 func (a *Wallet) Get(ctx *gear.Context) error {

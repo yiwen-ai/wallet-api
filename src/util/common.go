@@ -1,5 +1,20 @@
 package util
 
+import (
+	"math/rand"
+	"time"
+)
+
+var mathR *rand.Rand
+
+func init() {
+	mathR = rand.New(rand.NewSource(time.Now().UnixNano()))
+}
+
+func Int63n(n int64) int64 {
+	return mathR.Int63n(n)
+}
+
 func SliceHas[T comparable](sl []T, v T) bool {
 	for _, s := range sl {
 		if v == s {

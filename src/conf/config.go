@@ -56,6 +56,11 @@ type Base struct {
 	Walletbase string `json:"walletbase" toml:"walletbase"`
 }
 
+type Redis struct {
+	Prefix string `json:"prefix" toml:"prefix"`
+	Node   string `json:"node" toml:"node"`
+}
+
 // ConfigTpl ...
 type ConfigTpl struct {
 	Rand           *rand.Rand
@@ -64,6 +69,7 @@ type ConfigTpl struct {
 	Env            string `json:"env" toml:"env"`
 	Logger         Logger `json:"log" toml:"log"`
 	Server         Server `json:"server" toml:"server"`
+	Redis          Redis  `json:"redis" toml:"redis"`
 	Base           Base   `json:"base" toml:"base"`
 
 	globalJobs int64 // global async jobs counter for graceful shutdown
