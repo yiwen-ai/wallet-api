@@ -240,6 +240,8 @@ func (a *Checkout) completeSession(ctx *gear.Context, data []byte) error {
 	charge, err := a.blls.Walletbase.CompleteCharge(ctx, &bll.CompleteChargeInput{
 		UID:           uid,
 		ID:            cid,
+		Currency:      string(cs.Currency),
+		Amount:        uint(cs.AmountTotal),
 		ChargeID:      cs.ID,
 		ChargePayload: util.Bytes(data),
 	})

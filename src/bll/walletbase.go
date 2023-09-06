@@ -239,6 +239,8 @@ type UpdateChargeInput struct {
 type CompleteChargeInput struct {
 	UID           util.ID    `json:"uid" cbor:"uid"`
 	ID            util.ID    `json:"id" cbor:"id"`
+	Currency      string     `json:"currency" cbor:"currency"`
+	Amount        uint       `json:"amount" cbor:"amount"`
 	ChargeID      string     `json:"charge_id" cbor:"charge_id"`
 	ChargePayload util.Bytes `json:"charge_payload" cbor:"charge_payload"`
 }
