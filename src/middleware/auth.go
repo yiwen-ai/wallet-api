@@ -55,6 +55,7 @@ func (m AuthLevel) Auth(ctx *gear.Context) error {
 			util.CopyHeader(util.HeaderFromCtx(ctx), ctx.Req.Header,
 				"x-auth-user",
 			)
+			ctx.WithContext(gear.CtxWith[Session](ctx.Context(), sess))
 			return nil
 		}
 
@@ -73,6 +74,7 @@ func (m AuthLevel) Auth(ctx *gear.Context) error {
 		"x-auth-user-rating",
 		"x-auth-app",
 	)
+	ctx.WithContext(gear.CtxWith[Session](ctx.Context(), sess))
 	return nil
 }
 
