@@ -7,10 +7,12 @@ require (
 	github.com/fxamacker/cbor/v2 v2.5.0
 	github.com/go-playground/validator/v10 v10.15.3
 	github.com/google/uuid v1.3.1
+	github.com/joho/godotenv v1.5.1
 	github.com/klauspost/compress v1.16.7
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/rs/xid v1.5.0
 	github.com/stretchr/testify v1.8.4
+	github.com/stripe/stripe-go/v75 v75.3.0
 	github.com/teambition/gear v1.27.3
 	go.uber.org/dig v1.17.0
 )
@@ -24,10 +26,8 @@ require (
 	github.com/go-http-utils/negotiator v1.0.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stripe/stripe-go/v75 v75.3.0 // indirect
 	github.com/teambition/trie-mux v1.5.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/crypto v0.13.0 // indirect

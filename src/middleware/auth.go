@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -52,17 +51,10 @@ func (m AuthLevel) Auth(ctx *gear.Context) error {
 			log["uid"] = sess.UserID
 
 			ctx.Req.Header.Set("x-auth-user", sess.UserID.String())
-			ctxHeader := make(http.Header)
 			// inject auth headers into context for base service
-			util.CopyHeader(ctxHeader, ctx.Req.Header,
-				"x-real-ip",
-				"x-request-id",
+			util.CopyHeader(util.HeaderFromCtx(ctx), ctx.Req.Header,
 				"x-auth-user",
 			)
-
-			cctx := gear.CtxWith[Session](ctx.Context(), sess)
-			cheader := util.ContextHTTPHeader(ctxHeader)
-			ctx.WithContext(gear.CtxWith[util.ContextHTTPHeader](cctx, &cheader))
 			return nil
 		}
 
@@ -75,19 +67,12 @@ func (m AuthLevel) Auth(ctx *gear.Context) error {
 	}
 	log["aud"] = sess.AppID
 
-	ctxHeader := make(http.Header)
 	// inject auth headers into context for base service
-	util.CopyHeader(ctxHeader, ctx.Req.Header,
-		"x-real-ip",
-		"x-request-id",
+	util.CopyHeader(util.HeaderFromCtx(ctx), ctx.Req.Header,
 		"x-auth-user",
 		"x-auth-user-rating",
 		"x-auth-app",
 	)
-
-	cctx := gear.CtxWith[Session](ctx.Context(), sess)
-	cheader := util.ContextHTTPHeader(ctxHeader)
-	ctx.WithContext(gear.CtxWith[util.ContextHTTPHeader](cctx, &cheader))
 	return nil
 }
 
@@ -96,7 +81,7 @@ func WithGlobalCtx(ctx *gear.Context) context.Context {
 
 	if sess := gear.CtxValue[Session](ctx); sess != nil {
 		gctx = gear.CtxWith[Session](gctx, sess)
-		gctx = gear.CtxWith[util.ContextHTTPHeader](gctx, gear.CtxValue[util.ContextHTTPHeader](ctx))
+		gctx = gear.CtxWith[util.CtxHeader](gctx, gear.CtxValue[util.CtxHeader](ctx))
 	}
 
 	return gctx

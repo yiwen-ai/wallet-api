@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"io"
-	"net/http"
 	"strings"
 
 	"github.com/fxamacker/cbor/v2"
@@ -227,28 +226,23 @@ func (a *Checkout) completeSession(ctx *gear.Context, data []byte) error {
 	if err := json.Unmarshal(data, cs); err != nil {
 		return gear.ErrBadRequest.WithMsgf("json.Unmarshal failed: %v", err)
 	}
+
 	uid, err := util.ParseID(cs.Metadata["uid"])
 	if err != nil {
 		return gear.ErrBadRequest.WithMsgf("parse uid failed: %v", err)
 	}
-
 	logging.SetTo(ctx, "uid", uid)
 	cid, err := util.ParseID(cs.Metadata["cid"])
 	if err != nil {
 		return gear.ErrBadRequest.WithMsgf("parse uid failed: %v", err)
 	}
-
 	logging.SetTo(ctx, "chargeId", cid)
-	headers := http.Header{}
-	headers.Set("x-auth-user", uid.String())
-	headers.Set("x-auth-app", util.JARVIS.String())
-	headers.Set("x-real-ip", ctx.GetHeader("x-real-ip"))
-	headers.Set("x-request-id", ctx.GetHeader("x-request-id"))
 
-	ctxHeader := util.ContextHTTPHeader(headers)
-	cctx := gear.CtxWith[util.ContextHTTPHeader](ctx, &ctxHeader)
+	h := util.HeaderFromCtx(ctx)
+	h.Set("x-auth-user", uid.String())
+	h.Set("x-auth-app", util.JARVIS.String())
 
-	charge, err := a.blls.Walletbase.CompleteCharge(cctx, &bll.CompleteChargeInput{
+	charge, err := a.blls.Walletbase.CompleteCharge(ctx, &bll.CompleteChargeInput{
 		UID:           uid,
 		ID:            cid,
 		Currency:      string(cs.Currency),
@@ -264,7 +258,7 @@ func (a *Checkout) completeSession(ctx *gear.Context, data []byte) error {
 	if cs.Customer != nil && cs.CustomerDetails != nil {
 		data, err := cbor.Marshal(cs.CustomerDetails)
 		if err == nil {
-			_, err = a.blls.Walletbase.UpsertCustomer(cctx, &bll.CustomerInput{
+			_, err = a.blls.Walletbase.UpsertCustomer(ctx, &bll.CustomerInput{
 				UID:      uid,
 				Provider: "stripe",
 				Customer: cs.Customer.ID,

@@ -51,9 +51,9 @@ func (b *ExternalAPI) ExchangeRate(ctx context.Context) (*ExchangeRatesOutput, e
 func (b *ExternalAPI) exchangeRate(ctx context.Context) (*ExchangeRatesOutput, error) {
 
 	// https://www.exchangerate-api.com/docs
-	ctxHeader := make(util.ContextHTTPHeader)
-	http.Header(ctxHeader).Set("User-Agent", userAgent)
-	ctx = gear.CtxWith[util.ContextHTTPHeader](ctx, &ctxHeader)
+	h := http.Header{}
+	h.Set("User-Agent", userAgent)
+	ctx = gear.CtxWith[util.CtxHeader](ctx, util.Ptr(util.CtxHeader(h)))
 
 	type exchangeRateOutput struct {
 		Result     string `json:"result"`

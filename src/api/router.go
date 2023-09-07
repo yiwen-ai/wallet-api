@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/teambition/gear"
 
 	"github.com/yiwen-ai/wallet-api/src/bll"
@@ -34,6 +36,18 @@ func newAPIs(blls *bll.Blls) *APIs {
 func newRouters(apis *APIs) []*gear.Router {
 
 	router := gear.NewRouter()
+	router.Use(func(ctx *gear.Context) error {
+		h := http.Header{}
+		// inject headers into context for base service
+		util.CopyHeader(h, ctx.Req.Header,
+			"x-real-ip",
+			"x-request-id",
+		)
+
+		ctx.WithContext(gear.CtxWith[util.CtxHeader](ctx.Context(), util.Ptr(util.CtxHeader(h))))
+		return nil
+	})
+
 	router.Get("/healthz", apis.Healthz.Get)
 
 	// 允许匿名访问
