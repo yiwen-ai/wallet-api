@@ -12,7 +12,7 @@ require (
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/rs/xid v1.5.0
 	github.com/stretchr/testify v1.8.4
-	github.com/stripe/stripe-go/v75 v75.3.0
+	github.com/stripe/stripe-go/v75 v75.4.0
 	github.com/teambition/gear v1.27.3
 	go.uber.org/dig v1.17.0
 )

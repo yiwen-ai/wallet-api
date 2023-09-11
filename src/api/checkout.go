@@ -182,9 +182,10 @@ func (a *Checkout) ListCharges(ctx *gear.Context) error {
 		return gear.ErrInternalServerError.From(err)
 	}
 
-	// for i := range output {
-	// 	output[i].UID = nil
-	// }
+	for i := range output {
+		output[i].ChargeID = nil
+		output[i].ChargePayload = nil
+	}
 
 	return ctx.OkSend(bll.SuccessResponse[[]bll.ChargeOutput]{Result: output})
 }
