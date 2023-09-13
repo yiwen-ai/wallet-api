@@ -28,10 +28,10 @@ func Ptr[T any](t T) *T {
 	return &t
 }
 
-func RemoveDuplicates[T comparable](sl []T) []T {
-	var res []T
+func RemoveDuplicates[T comparable](sl []T, excludes ...T) []T {
+	res := make([]T, 0, len(sl)/2)
 	for _, s := range sl {
-		if !SliceHas(res, s) {
+		if !SliceHas(res, s) && !SliceHas(excludes, s) {
 			res = append(res, s)
 		}
 	}

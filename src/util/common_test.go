@@ -16,6 +16,8 @@ func TestSliceHas(t *testing.T) {
 
 func TestRemoveDuplicates(t *testing.T) {
 	assert.Equal(t, RemoveDuplicates([]string{"a", "b", "a"}), []string{"a", "b"})
+	assert.Equal(t, RemoveDuplicates([]string{"a", "b", "a"}, "b"), []string{"a"})
+	assert.Equal(t, RemoveDuplicates([]string{"a", "b", "a"}, "b", "a"), []string{})
 
 	id := NewID()
 	id2 := mustParseID(id.String())

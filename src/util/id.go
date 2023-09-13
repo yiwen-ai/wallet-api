@@ -45,6 +45,10 @@ func (id *ID) String() string {
 	return xid.ID(*id).String()
 }
 
+func (id ID) UnixMs() int64 {
+	return xid.ID(id).Time().Unix() * 1000
+}
+
 func (id ID) MarshalCBOR() ([]byte, error) {
 	return cbor.Marshal(xid.ID(id).Bytes())
 }

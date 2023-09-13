@@ -88,6 +88,7 @@ func (b *Walletbase) Sponsor(ctx context.Context, input *ExpendInput) (*WalletOu
 type TransactionOutput struct {
 	ID           util.ID     `json:"id" cbor:"id"`
 	Sequence     int64       `json:"sequence" cbor:"sequence"`
+	Payer        *util.ID    `json:"payer,omitempty" cbor:"payer,omitempty"`
 	Payee        *util.ID    `json:"payee,omitempty" cbor:"payee,omitempty"`
 	SubPayee     *util.ID    `json:"sub_payee,omitempty" cbor:"sub_payee,omitempty"`
 	Status       int8        `json:"status" cbor:"status"`
@@ -95,8 +96,10 @@ type TransactionOutput struct {
 	Amount       int64       `json:"amount" cbor:"amount"`
 	SysFee       int64       `json:"sys_fee" cbor:"sys_fee"`
 	SubShares    int64       `json:"sub_shares" cbor:"sub_shares"`
+	CreatedAt    int64       `json:"created_at" cbor:"created_at"`
 	Description  string      `json:"description,omitempty" cbor:"description,omitempty"`
 	Payload      *util.Bytes `json:"payload,omitempty" cbor:"payload,omitempty"`
+	PayerInfo    *UserInfo   `json:"payer_info,omitempty" cbor:"payer_info,omitempty"`
 	PayeeInfo    *UserInfo   `json:"payee_info,omitempty" cbor:"payee_info,omitempty"`
 	SubPayeeInfo *UserInfo   `json:"sub_payee_info,omitempty" cbor:"sub_payee_info,omitempty"`
 }
@@ -109,6 +112,11 @@ func (list *Transactions) LoadUsers(loader func(ids ...util.ID) []UserInfo) {
 	}
 
 	ids := make([]util.ID, 0, len(*list))
+	for _, v := range *list {
+		if v.Payer != nil {
+			ids = append(ids, *v.Payer)
+		}
+	}
 	for _, v := range *list {
 		if v.Payee != nil {
 			ids = append(ids, *v.Payee)
@@ -133,6 +141,10 @@ func (list *Transactions) LoadUsers(loader func(ids ...util.ID) []UserInfo) {
 
 	for i := range *list {
 		v := (*list)[i]
+		if v.Payer != nil {
+			v.PayerInfo = infoMap[*v.Payer]
+			v.Payer = nil
+		}
 		if v.Payee != nil {
 			v.PayeeInfo = infoMap[*v.Payee]
 			v.Payee = nil
@@ -150,6 +162,9 @@ func (b *Walletbase) ListOutgo(ctx context.Context, input *UIDPagination) (*Succ
 		return nil, err
 	}
 
+	for i := range output.Result {
+		output.Result[i].CreatedAt = output.Result[i].ID.UnixMs()
+	}
 	return &output, nil
 }
 
@@ -159,6 +174,9 @@ func (b *Walletbase) ListIncome(ctx context.Context, input *UIDPagination) (*Suc
 		return nil, err
 	}
 
+	for i := range output.Result {
+		output.Result[i].CreatedAt = output.Result[i].ID.UnixMs()
+	}
 	return &output, nil
 }
 
@@ -168,6 +186,9 @@ func (b *Walletbase) ListShares(ctx context.Context, input *UIDPagination) (*Suc
 		return nil, err
 	}
 
+	for i := range output.Result {
+		output.Result[i].CreatedAt = output.Result[i].ID.UnixMs()
+	}
 	return &output, nil
 }
 
@@ -251,6 +272,7 @@ type ChargeOutput struct {
 	Provider       string      `json:"provider" cbor:"provider"`
 	Status         int8        `json:"status" cbor:"status"`
 	Quantity       uint        `json:"quantity" cbor:"quantity"`
+	CreatedAt      int64       `json:"created_at" cbor:"created_at"`
 	UpdatedAt      *int64      `json:"updated_at,omitempty" cbor:"updated_at,omitempty"`
 	ExpireAt       *int64      `json:"expire_at,omitempty" cbor:"expire_at,omitempty"`
 	Currency       *string     `json:"currency,omitempty" cbor:"currency,omitempty"`
@@ -277,6 +299,7 @@ func (b *Walletbase) GetCharge(ctx context.Context, uid, id util.ID, fields *str
 		return nil, err
 	}
 
+	output.Result.CreatedAt = output.Result.ID.UnixMs()
 	return &output.Result, nil
 }
 
@@ -313,5 +336,28 @@ func (b *Walletbase) ListCharges(ctx context.Context, input *UIDPagination) ([]C
 		return nil, err
 	}
 
+	for i := range output.Result {
+		output.Result[i].CreatedAt = output.Result[i].ID.UnixMs()
+	}
+	return output.Result, nil
+}
+
+type CreditOutput struct {
+	Txn         util.ID `json:"txn" cbor:"txn"`
+	Kind        string  `json:"kind" cbor:"kind"`
+	Amount      int64   `json:"amount" cbor:"amount"`
+	CreatedAt   int64   `json:"created_at" cbor:"created_at"`
+	Description string  `json:"description,omitempty" cbor:"description,omitempty"`
+}
+
+func (b *Walletbase) ListCredits(ctx context.Context, input *UIDPagination) ([]CreditOutput, error) {
+	output := SuccessResponse[[]CreditOutput]{}
+	if err := b.svc.Post(ctx, "/v1/wallet/list_credits", input, &output); err != nil {
+		return nil, err
+	}
+
+	for i := range output.Result {
+		output.Result[i].CreatedAt = output.Result[i].Txn.UnixMs()
+	}
 	return output.Result, nil
 }

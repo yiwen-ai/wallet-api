@@ -67,3 +67,19 @@ func (a *Wallet) Sponsor(ctx *gear.Context) error {
 
 	return ctx.OkSend(bll.SuccessResponse[*bll.WalletOutput]{Result: output})
 }
+
+func (a *Wallet) ListCredits(ctx *gear.Context) error {
+	input := &bll.UIDPagination{}
+	if err := ctx.ParseBody(input); err != nil {
+		return err
+	}
+	sess := gear.CtxValue[middleware.Session](ctx)
+	input.UID = &sess.UserID
+
+	output, err := a.blls.Walletbase.ListCredits(ctx, input)
+	if err != nil {
+		return gear.ErrInternalServerError.From(err)
+	}
+
+	return ctx.OkSend(bll.SuccessResponse[[]bll.CreditOutput]{Result: output})
+}
