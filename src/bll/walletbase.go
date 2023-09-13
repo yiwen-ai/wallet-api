@@ -140,18 +140,17 @@ func (list *Transactions) LoadUsers(loader func(ids ...util.ID) []UserInfo) {
 	}
 
 	for i := range *list {
-		v := (*list)[i]
-		if v.Payer != nil {
-			v.PayerInfo = infoMap[*v.Payer]
-			v.Payer = nil
+		if (*list)[i].Payer != nil {
+			(*list)[i].PayerInfo = infoMap[*(*list)[i].Payer]
+			(*list)[i].Payer = nil
 		}
-		if v.Payee != nil {
-			v.PayeeInfo = infoMap[*v.Payee]
-			v.Payee = nil
+		if (*list)[i].Payee != nil {
+			(*list)[i].PayeeInfo = infoMap[*(*list)[i].Payee]
+			(*list)[i].Payee = nil
 		}
-		if v.SubPayee != nil {
-			v.SubPayeeInfo = infoMap[*v.SubPayee]
-			v.SubPayee = nil
+		if (*list)[i].SubPayee != nil {
+			(*list)[i].SubPayeeInfo = infoMap[*(*list)[i].SubPayee]
+			(*list)[i].SubPayee = nil
 		}
 	}
 }
