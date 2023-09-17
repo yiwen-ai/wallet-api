@@ -195,6 +195,10 @@ func (a *Checkout) ListCharges(ctx *gear.Context) error {
 	return ctx.OkSend(bll.SuccessResponse[[]bll.ChargeOutput]{Result: output})
 }
 
+// checkout.session.async_payment_failed
+// checkout.session.async_payment_succeeded
+// checkout.session.completed
+// checkout.session.expired
 func (a *Checkout) StripeWebhook(ctx *gear.Context) error {
 	b, err := io.ReadAll(ctx.Req.Body)
 	if err != nil {
@@ -217,11 +221,19 @@ func (a *Checkout) StripeWebhook(ctx *gear.Context) error {
 	logging.SetTo(ctx, "objectType", obj["object"])
 	logging.SetTo(ctx, "objectId", obj["id"])
 
-	if event.Type == "checkout.session.completed" {
+	switch event.Type {
+	case "checkout.session.completed":
 		if err = a.completeSession(ctx, event.Data.Raw); err != nil {
-			logging.SetTo(ctx, "completeSessionError", err.Error())
+			logging.SetTo(ctx, "error", err.Error())
 			return ctx.Error(err)
 		}
+	case "checkout.session.expired":
+		if err = a.expireSession(ctx, event.Data.Raw); err != nil {
+			logging.SetTo(ctx, "error", err.Error())
+			return ctx.Error(err)
+		}
+	default:
+		logging.SetTo(ctx, "msg", "unknown event type")
 	}
 
 	return ctx.OkJSON(bll.SuccessResponse[bool]{Result: true})
@@ -284,6 +296,43 @@ func (a *Checkout) completeSession(ctx *gear.Context, data []byte) error {
 		Amount: int64(charge.Quantity),
 	}); err != nil {
 		logging.SetTo(ctx, "writeLogError", err.Error())
+	}
+
+	return nil
+}
+
+func (a *Checkout) expireSession(ctx *gear.Context, data []byte) error {
+	cs := &stripe.CheckoutSession{}
+	if err := json.Unmarshal(data, cs); err != nil {
+		return gear.ErrBadRequest.WithMsgf("json.Unmarshal failed: %v", err)
+	}
+
+	uid, err := util.ParseID(cs.Metadata["uid"])
+	if err != nil {
+		return gear.ErrBadRequest.WithMsgf("parse uid failed: %v", err)
+	}
+	logging.SetTo(ctx, "uid", uid)
+	cid, err := util.ParseID(cs.Metadata["cid"])
+	if err != nil {
+		return gear.ErrBadRequest.WithMsgf("parse uid failed: %v", err)
+	}
+	logging.SetTo(ctx, "chargeId", cid)
+
+	h := util.HeaderFromCtx(ctx)
+	h.Set("x-auth-user", uid.String())
+	h.Set("x-auth-app", util.JARVIS.String())
+
+	_, err = a.blls.Walletbase.UpdateCharge(ctx, &bll.UpdateChargeInput{
+		UID:           uid,
+		ID:            cid,
+		CurrentStatus: 1,
+		Status:        -2,
+		FailureCode:   util.Ptr("checkout.expired"),
+		FailureMsg:    util.Ptr("checkout.expired"),
+	})
+
+	if err != nil {
+		return gear.ErrInternalServerError.From(err)
 	}
 
 	return nil
