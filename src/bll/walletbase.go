@@ -283,6 +283,7 @@ type ChargeOutput struct {
 	TxnRefunded    *util.ID    `json:"txn_refunded,omitempty" cbor:"txn_refunded,omitempty"`
 	FailureCode    *string     `json:"failure_code,omitempty" cbor:"failure_code,omitempty"`
 	FailureMsg     *string     `json:"failure_msg,omitempty" cbor:"failure_msg,omitempty"`
+	PaymentURL     *string     `json:"payment_url" cbor:"payment_url"`
 }
 
 func (b *Walletbase) GetCharge(ctx context.Context, uid, id util.ID, fields *string) (*ChargeOutput, error) {

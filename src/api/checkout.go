@@ -183,6 +183,11 @@ func (a *Checkout) ListCharges(ctx *gear.Context) error {
 	}
 
 	for i := range output {
+		if output[i].Status == 1 && output[i].ChargeID != nil {
+			if cs, err := session.Get(*(output[i].ChargeID), nil); err == nil {
+				output[i].PaymentURL = util.Ptr(cs.URL)
+			}
+		}
 		output[i].ChargeID = nil
 		output[i].ChargePayload = nil
 	}

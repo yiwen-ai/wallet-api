@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/teambition/gear"
+	"github.com/yiwen-ai/wallet-api/src/logging"
 	"github.com/yiwen-ai/wallet-api/src/service"
 	"github.com/yiwen-ai/wallet-api/src/util"
 )
@@ -33,7 +34,7 @@ func (b *ExternalAPI) ExchangeRate(ctx context.Context) (*ExchangeRatesOutput, e
 		_ = b.redis.GetCBOR(ctx, "exchange_rates", &v)
 	}
 
-	r := util.Int63n(7200)
+	r := util.Int63n(3500) + 100
 	if v != nil && time.Now().Unix()-r < int64(v.LastUpdate) {
 		return v, nil
 	}
@@ -48,7 +49,15 @@ func (b *ExternalAPI) ExchangeRate(ctx context.Context) (*ExchangeRatesOutput, e
 	return b.exchangeRate(ctx)
 }
 
-func (b *ExternalAPI) exchangeRate(ctx context.Context) (*ExchangeRatesOutput, error) {
+func (b *ExternalAPI) exchangeRate(ctx context.Context) (rate *ExchangeRatesOutput, err error) {
+	defer func() {
+		if err != nil {
+			logging.Logger.Err(logging.Log{
+				"action": "fetch_exchange_rates",
+				"error":  err.Error(),
+			})
+		}
+	}()
 
 	// https://www.exchangerate-api.com/docs
 	h := http.Header{}
@@ -66,16 +75,17 @@ func (b *ExternalAPI) exchangeRate(ctx context.Context) (*ExchangeRatesOutput, e
 
 	output := &exchangeRateOutput{}
 	api := "https://v6.exchangerate-api.com/v6/245ef0a5e7b4a1799b2d9a64/latest/HKD"
-	err := util.RequestJSON(ctx, util.ExternalHTTPClient, http.MethodGet, api, nil, output)
+	err = util.RequestJSON(ctx, util.ExternalHTTPClient, http.MethodGet, api, nil, output)
 	if err != nil {
 		return nil, err
 	}
 
 	if output.Result != "success" {
-		return nil, errors.New("fetch exchange rate failed")
+		err = errors.New("fetch exchange rate failed")
+		return nil, err
 	}
 
-	rate := &ExchangeRatesOutput{
+	rate = &ExchangeRatesOutput{
 		LastUpdate: output.LastUpdate,
 		NextUpdate: output.NextUpdate,
 		Base:       output.Base,
@@ -86,6 +96,13 @@ func (b *ExternalAPI) exchangeRate(ctx context.Context) (*ExchangeRatesOutput, e
 	if err = b.redis.SetCBOR(ctx, "exchange_rates", rate, 0); err != nil {
 		return nil, err
 	}
+
+	logging.Logger.Info(logging.Log{
+		"action":     "fetch_exchange_rates",
+		"base":       rate.Base,
+		"lastUpdate": time.Unix(int64(rate.LastUpdate), 0),
+		"nextUpdate": time.Unix(int64(rate.NextUpdate), 0),
+	})
 
 	return rate, nil
 }
