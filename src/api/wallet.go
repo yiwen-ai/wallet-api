@@ -81,5 +81,5 @@ func (a *Wallet) ListCredits(ctx *gear.Context) error {
 		return gear.ErrInternalServerError.From(err)
 	}
 
-	return ctx.OkSend(bll.SuccessResponse[[]bll.CreditOutput]{Result: output})
+	return ctx.OkSend(output)
 }

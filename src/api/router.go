@@ -55,7 +55,7 @@ func newRouters(apis *APIs) []*gear.Router {
 
 	// access_token 访问
 	router.Get("/v1/wallet", middleware.AuthToken.Auth, apis.Wallet.Get)
-	router.Post("/v1/wallet/sponsor", middleware.AuthToken.Auth, apis.Wallet.Sponsor)
+	router.Post("/v1/wallet/sponsor", middleware.AuthToken.Auth, middleware.CheckUserStatus(0), apis.Wallet.Sponsor)
 	router.Post("/v1/wallet/list_credits", middleware.AuthToken.Auth, apis.Wallet.ListCredits)
 
 	router.Post("/v1/transaction/list_outgo", middleware.AuthToken.Auth, apis.Transaction.ListOutgo)
@@ -64,7 +64,7 @@ func newRouters(apis *APIs) []*gear.Router {
 
 	router.Get("/v1/checkout/config", middleware.AuthToken.Auth, apis.Checkout.GetConfig)
 	router.Get("/v1/checkout", middleware.AuthToken.Auth, apis.Checkout.Get)
-	router.Post("/v1/checkout", middleware.AuthToken.Auth, apis.Checkout.Create)
+	router.Post("/v1/checkout", middleware.AuthToken.Auth, middleware.CheckUserStatus(0), apis.Checkout.Create)
 	router.Post("/v1/checkout/list", middleware.AuthToken.Auth, apis.Checkout.ListCharges)
 
 	router.Post("/v1/webhook/stripe", apis.Checkout.StripeWebhook)

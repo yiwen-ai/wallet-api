@@ -350,7 +350,7 @@ type CreditOutput struct {
 	Description string  `json:"description,omitempty" cbor:"description,omitempty"`
 }
 
-func (b *Walletbase) ListCredits(ctx context.Context, input *UIDPagination) ([]CreditOutput, error) {
+func (b *Walletbase) ListCredits(ctx context.Context, input *UIDPagination) (*SuccessResponse[[]CreditOutput], error) {
 	output := SuccessResponse[[]CreditOutput]{}
 	if err := b.svc.Post(ctx, "/v1/wallet/list_credits", input, &output); err != nil {
 		return nil, err
@@ -359,5 +359,5 @@ func (b *Walletbase) ListCredits(ctx context.Context, input *UIDPagination) ([]C
 	for i := range output.Result {
 		output.Result[i].CreatedAt = output.Result[i].Txn.UnixMs()
 	}
-	return output.Result, nil
+	return &output, nil
 }
