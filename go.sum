@@ -52,8 +52,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/stripe/stripe-go/v75 v75.6.0 h1:KCqcqEFQbGLc76aveGJkpZIghITO5HIlBbKBlvBhhps=
-github.com/stripe/stripe-go/v75 v75.6.0/go.mod h1:wT44gah+eCY8Z0aSpY/vQlYYbicU9uUAbAqdaUxxDqE=
+github.com/stripe/stripe-go/v75 v75.8.0 h1:kXdHvihp03v64L0C+xXGjolsdzdOmCqwKLnK2wA6bio=
+github.com/stripe/stripe-go/v75 v75.8.0/go.mod h1:wT44gah+eCY8Z0aSpY/vQlYYbicU9uUAbAqdaUxxDqE=
 github.com/teambition/gear v1.27.3 h1:iWUOJYdBwxU+SZP5aZ2ZYR5FnRGmdgrMbbSpOCZo0go=
 github.com/teambition/gear v1.27.3/go.mod h1:d3Nmr6rRPnH5lYSK33W9IDhsaxp/8n14vRrUZu9dP9c=
 github.com/teambition/trie-mux v1.5.2 h1:ALTagFwKZXkn1vfSRlODlmoZg+NMeWAm4dyBPQI6a8w=
