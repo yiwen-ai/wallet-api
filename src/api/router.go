@@ -60,7 +60,6 @@ func newRouters(apis *APIs) []*gear.Router {
 
 	router.Post("/v1/transaction/list_outgo", middleware.AuthToken.Auth, apis.Transaction.ListOutgo)
 	router.Post("/v1/transaction/list_income", middleware.AuthToken.Auth, apis.Transaction.ListIncome)
-	router.Post("/v1/transaction/list_shares", middleware.AuthToken.Auth, apis.Transaction.ListShares)
 
 	router.Get("/v1/checkout/config", middleware.AuthToken.Auth, apis.Checkout.GetConfig)
 	router.Get("/v1/checkout", middleware.AuthToken.Auth, apis.Checkout.Get)

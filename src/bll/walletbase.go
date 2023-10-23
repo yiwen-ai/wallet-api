@@ -92,11 +92,13 @@ type TransactionOutput struct {
 	Payee        *util.ID    `json:"payee,omitempty" cbor:"payee,omitempty"`
 	SubPayee     *util.ID    `json:"sub_payee,omitempty" cbor:"sub_payee,omitempty"`
 	Status       int8        `json:"status" cbor:"status"`
+	Role         int8        `json:"role" cbor:"role"` // 0: payer, 1: payee, 2: sub_payee
 	Kind         string      `json:"kind" cbor:"kind"`
 	Amount       int64       `json:"amount" cbor:"amount"`
 	SysFee       int64       `json:"sys_fee" cbor:"sys_fee"`
 	SubShares    int64       `json:"sub_shares" cbor:"sub_shares"`
 	CreatedAt    int64       `json:"created_at" cbor:"created_at"`
+	Income       int64       `json:"income,omitempty" cbor:"income,omitempty"`
 	Description  string      `json:"description,omitempty" cbor:"description,omitempty"`
 	Payload      *util.Bytes `json:"payload,omitempty" cbor:"payload,omitempty"`
 	PayerInfo    *UserInfo   `json:"payer_info,omitempty" cbor:"payer_info,omitempty"`
@@ -173,20 +175,19 @@ func (b *Walletbase) ListIncome(ctx context.Context, input *UIDPagination) (*Suc
 		return nil, err
 	}
 
+	uid := *input.UID
 	for i := range output.Result {
-		output.Result[i].CreatedAt = output.Result[i].ID.UnixMs()
-	}
-	return &output, nil
-}
+		v := output.Result[i]
+		switch {
+		case v.Payee != nil && *v.Payee == uid:
+			output.Result[i].Role = 1
+			output.Result[i].Income = v.Amount - v.SysFee - v.SubShares
+		case v.SubPayee != nil && *v.SubPayee == uid:
+			output.Result[i].Role = 2
+			output.Result[i].Income = v.SubShares
+		}
 
-func (b *Walletbase) ListShares(ctx context.Context, input *UIDPagination) (*SuccessResponse[Transactions], error) {
-	output := SuccessResponse[Transactions]{}
-	if err := b.svc.Post(ctx, "/v1/transaction/list_shares", input, &output); err != nil {
-		return nil, err
-	}
-
-	for i := range output.Result {
-		output.Result[i].CreatedAt = output.Result[i].ID.UnixMs()
+		output.Result[i].CreatedAt = v.ID.UnixMs()
 	}
 	return &output, nil
 }
